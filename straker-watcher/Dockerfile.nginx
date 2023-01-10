@@ -1,0 +1,6 @@
+FROM harbor.wistronits.com/library/nginx:latest
+
+COPY ./config/nginx /etc/nginx
+COPY ./config/ssl-certificates /ssl-certificates
+
+EXPOSE 80 443

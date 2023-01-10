@@ -1,0 +1,59 @@
+version: '3.7'
+services:
+
+  mysql:
+    image: harbor.wistronits.com/library/mysql:5.7
+    #    ports:
+    #      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: straker
+      MYSQL_DATABASE: straker_db
+      TZ: "Asia/Taipei"
+    volumes:
+      - ./local-db:/var/lib/mysql
+      - ./config/sql/init_straker_db.sql:/docker-entrypoint-initdb.d/init_straker_db.sql
+
+  tw_straker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      LANGUAGE: tw
+      PYTHONUNBUFFERED: 1
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: straker
+      DB_NAME: straker_db
+    ports:
+      - 5000:5000
+    depends_on:
+      - mysql
+
+  cn_straker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      LANGUAGE: cn
+      PYTHONUNBUFFERED: 1
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: straker
+      DB_NAME: straker_db
+    ports:
+      - 8000:5000
+    depends_on:
+      - mysql
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - tw_straker
+      - cn_straker
